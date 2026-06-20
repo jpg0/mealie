@@ -122,6 +122,7 @@ export interface ContextMenuIncludes {
   mealplanner: boolean;
   shoppingList: boolean;
   print: boolean;
+  recipeCard: boolean;
   printPreferences: boolean;
   share: boolean;
   recipeActions: boolean;
@@ -158,6 +159,7 @@ const props = withDefaults(defineProps<Props>(), {
     mealplanner: true,
     shoppingList: true,
     print: true,
+    recipeCard: true,
     printPreferences: true,
     share: true,
     recipeActions: true,
@@ -264,6 +266,13 @@ const defaultItems: { [key: string]: ContextMenuItem } = {
     icon: $globals.icons.printer,
     color: undefined,
     event: "print",
+    isPublic: true,
+  },
+  recipeCard: {
+    title: i18n.t("recipe.recipe-card"),
+    icon: $globals.icons.pageLayoutBody,
+    color: undefined,
+    event: "recipeCard",
     isPublic: true,
   },
   printPreferences: {
@@ -426,6 +435,10 @@ const eventHandlers: { [key: string]: () => void | Promise<any> } = {
   },
   share: () => {
     shareDialog.value = true;
+  },
+  recipeCard: () => {
+    const url = router.resolve(`/g/${groupSlug.value}/r/${props.slug}/card`).href;
+    window.open(url, "_blank");
   },
 };
 

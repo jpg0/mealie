@@ -70,6 +70,7 @@
           mealplanner: loggedIn,
           shoppingList: loggedIn,
           print: true,
+          recipeCard: true,
           printPreferences: true,
           share: loggedIn,
           recipeActions: true,
