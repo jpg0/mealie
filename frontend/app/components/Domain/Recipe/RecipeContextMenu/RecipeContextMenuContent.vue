@@ -70,6 +70,13 @@
     :shopping-lists="shoppingLists"
   />
 
+  <RecipeDialogRewriteForTools
+    v-if="recipeRef && rewriteDialog"
+    v-model="rewriteDialog"
+    :recipe="recipeRef"
+    @rewritten="handleRewriteComplete"
+  />
+
   <v-list density="compact">
     <v-list-item v-for="(item, index) in menuItems" :key="index" @click="contextMenuEventHandler(item.event)">
       <template #prepend>
@@ -103,6 +110,7 @@
 import RecipeDialogAddToShoppingList from "~/components/Domain/Recipe/RecipeDialogAddToShoppingList.vue";
 import RecipeDialogPrintPreferences from "~/components/Domain/Recipe/RecipeDialogPrintPreferences.vue";
 import RecipeDialogShare from "~/components/Domain/Recipe/RecipeDialogShare.vue";
+import RecipeDialogRewriteForTools from "~/components/Domain/Recipe/RecipeDialogRewriteForTools.vue";
 import { useLoggedInState } from "~/composables/use-logged-in-state";
 import { useUserApi } from "~/composables/api";
 import { useGroupRecipeActions } from "~/composables/use-group-recipe-actions";
@@ -126,6 +134,7 @@ export interface ContextMenuIncludes {
   printPreferences: boolean;
   share: boolean;
   recipeActions: boolean;
+  rewriteForTools: boolean;
 }
 
 export interface ContextMenuItem {
@@ -163,6 +172,7 @@ const props = withDefaults(defineProps<Props>(), {
     printPreferences: true,
     share: true,
     recipeActions: true,
+    rewriteForTools: false,
   }),
   appendItems: () => [],
   leadingItems: () => [],
@@ -188,6 +198,7 @@ const recipeDeleteDialog = ref(false);
 const mealplannerDialog = ref(false);
 const shoppingListDialog = ref(false);
 const recipeDuplicateDialog = ref(false);
+const rewriteDialog = ref(false);
 const recipeName = ref(props.name);
 const loading = ref(false);
 const menuItems = ref<ContextMenuItem[]>([]);
@@ -217,6 +228,23 @@ const firstDayOfWeek = computed(() => {
 
 // ===========================================================================
 // Context Menu Setup
+
+const recipeRef = ref<Recipe | undefined>(props.recipe);
+const recipeRefWithScale = computed(() =>
+  recipeRef.value ? { scale: props.recipeScale, ...recipeRef.value } : undefined,
+);
+
+const isAdminAndNotOwner = computed(() => {
+  return (
+    auth.user.value?.admin
+    && auth.user.value?.id !== recipeRef.value?.userId
+  );
+});
+const canDelete = computed(() => {
+  const user = auth.user.value;
+  const recipe = recipeRef.value;
+  return user && recipe && (user.admin || user.id === recipe.userId);
+});
 
 const defaultItems: { [key: string]: ContextMenuItem } = {
   edit: {
@@ -289,6 +317,13 @@ const defaultItems: { [key: string]: ContextMenuItem } = {
     event: "share",
     isPublic: false,
   },
+  rewriteForTools: {
+    title: i18n.t("recipe.rewrite-for-tools"),
+    icon: $globals.icons.blender,
+    color: undefined,
+    event: "rewriteForTools",
+    isPublic: false,
+  },
 };
 
 // Add leading and Appending Items
@@ -298,21 +333,6 @@ menuItems.value = [...menuItems.value, ...props.leadingItems, ...props.appendIte
 // Context Menu Event Handler
 
 const shoppingLists = ref<ShoppingListSummary[]>();
-const recipeRef = ref<Recipe | undefined>(props.recipe);
-const recipeRefWithScale = computed(() =>
-  recipeRef.value ? { scale: props.recipeScale, ...recipeRef.value } : undefined,
-);
-const isAdminAndNotOwner = computed(() => {
-  return (
-    auth.user.value?.admin
-    && auth.user.value?.id !== recipeRef.value?.userId
-  );
-});
-const canDelete = computed(() => {
-  const user = auth.user.value;
-  const recipe = recipeRef.value;
-  return user && recipe && (user.admin || user.id === recipe.userId);
-});
 
 // Get Default Menu Items Specified in Props
 for (const [key, value] of Object.entries(props.useItems)) {
@@ -457,4 +477,16 @@ function contextMenuEventHandler(eventKey: string) {
 
 const planTypeOptions = usePlanTypeOptions();
 const recipeActions = groupRecipeActionsStore.recipeActions;
+
+async function handleRewriteComplete(newSlug: string) {
+  await refreshRecipe();
+  router.push(`/g/${groupSlug.value}/r/${newSlug}`);
+}
+
+// Add rewriteForTools event handler
+eventHandlers.rewriteForTools = () => {
+  if (recipeRef.value) {
+    rewriteDialog.value = true;
+  }
+};
 </script>

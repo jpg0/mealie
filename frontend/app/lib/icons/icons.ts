@@ -19,6 +19,7 @@ import {
   mdiBookOpenPageVariant,
   mdiBookOutline,
   mdiBowlMixOutline,
+  mdiBlender,
   mdiBroom,
   mdiBullhornVariant,
   mdiCalendar,
@@ -173,6 +174,7 @@ export const icons = {
 
   // General
   bowlMixOutline: mdiBowlMixOutline,
+  blender: mdiBlender,
   help: mdiHelpCircleOutline,
   foods: mdiFoodApple,
   units: mdiBeakerOutline,

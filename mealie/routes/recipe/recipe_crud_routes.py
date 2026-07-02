@@ -1,7 +1,7 @@
 import asyncio
 from collections import defaultdict
 from collections.abc import AsyncIterable
-from shutil import copyfileobj
+from shutil import copyfileobj, copytree
 from uuid import UUID
 
 import orjson
@@ -45,6 +45,7 @@ from mealie.schema.recipe.recipe_scraper import ScrapeRecipeTest
 from mealie.schema.recipe.recipe_suggestion import RecipeSuggestionQuery, RecipeSuggestionResponse
 from mealie.schema.recipe.request_helpers import (
     RecipeDuplicate,
+    RecipeRewriteForTools,
     UpdateImageResponse,
 )
 from mealie.schema.response import PaginationBase, PaginationQuery
@@ -64,11 +65,13 @@ from mealie.services.event_bus_service.event_types import (
     EventRecipeData,
     EventTypes,
 )
+from mealie.services.recipe.cooking_tools import COOKING_TOOLS
 from mealie.services.recipe.recipe_data_service import (
     InvalidDomainError,
     NotAnImageError,
     RecipeDataService,
 )
+from mealie.services.recipe.recipe_service import OpenAIRecipeService
 from mealie.services.scraper.recipe_bulk_scraper import RecipeBulkScraperService
 from mealie.services.scraper.scraped_extras import ScraperContext
 from mealie.services.scraper.scraper import create_from_html
@@ -334,6 +337,11 @@ class RecipeController(BaseRecipeController):
 
         return recipe.slug
 
+    @router.get("/cooking-tools")
+    def get_cooking_tools(self):
+        """Returns the list of available cooking tools."""
+        return [{"id": tool.id, "name": tool.name} for tool in COOKING_TOOLS.values()]
+
     # ==================================================================================================================
     # CRUD Operations
 
@@ -464,6 +472,90 @@ class RecipeController(BaseRecipeController):
                 message=self.t(
                     "notifications.generic-duplicated",
                     name=new_recipe.name,
+                ),
+            )
+
+        return new_recipe
+
+    @router.post("/{slug}/rewrite-for-tools", status_code=201, response_model=Recipe)
+    async def rewrite_for_tools(self, slug: str, req: RecipeRewriteForTools):
+        """Rewrite a recipe optimized for the user's cooking tools using AI."""
+        if not req.tools:
+            raise HTTPException(
+                status_code=400,
+                detail=ErrorResponse.respond("At least one cooking tool must be specified"),
+            )
+
+        ai_settings = self.group.ai_provider_settings
+        if not (ai_settings and ai_settings.ai_enabled):
+            raise HTTPException(
+                status_code=400,
+                detail=ErrorResponse.respond("AI services are not enabled"),
+            )
+
+        try:
+            original_recipe = self.service.get_one(slug)
+        except Exception as e:
+            self.handle_exceptions(e)
+
+        # Generate name if not provided
+        if req.name:
+            new_name = req.name
+        else:
+            tool_names = [COOKING_TOOLS[t].name for t in req.tools if t in COOKING_TOOLS]
+            suffix = " & ".join(tool_names)
+            new_name = f"{original_recipe.name} ({suffix})"
+
+        try:
+            openai_recipe_service = OpenAIRecipeService(
+                self.repos, self.user, self.household, self.translator
+            )
+            new_recipe_data = await openai_recipe_service.rewrite_recipe_for_tools(
+                original_recipe, new_name, req.tools
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to rewrite recipe: {e}")
+            from mealie.core.exceptions import RecipeNotImprovedError
+            if isinstance(e, RecipeNotImprovedError):
+                raise HTTPException(
+                    status_code=400,
+                    detail=ErrorResponse.respond(str(e)),
+                )
+            raise HTTPException(
+                status_code=500,
+                detail=ErrorResponse.respond(f"Failed to rewrite recipe: {e}"),
+            )
+
+        try:
+            new_recipe = self.service.create_one(new_recipe_data)
+        except Exception as e:
+            self.handle_exceptions(e)
+
+        # Copy image from original recipe
+        try:
+            if original_recipe.id and original_recipe.image:
+                old_service = RecipeDataService(original_recipe.id)
+                new_service = RecipeDataService(new_recipe.id)
+                copytree(old_service.dir_data, new_service.dir_data, dirs_exist_ok=True)
+                new_recipe.image = cache.cache_key.new_key()
+                self.service.update_one(new_recipe.slug, new_recipe)
+        except Exception as e:
+            self.logger.error(f"Failed to copy image: {e}")
+
+        if new_recipe:
+            self.publish_event(
+                event_type=EventTypes.recipe_created,
+                document_data=EventRecipeData(
+                    operation=EventOperation.create, recipe_slug=new_recipe.slug
+                ),
+                group_id=new_recipe.group_id,
+                household_id=new_recipe.household_id,
+                message=self.t(
+                    "notifications.generic-created-with-url",
+                    name=new_recipe.name,
+                    url=urls.recipe_url(
+                        self.group.slug, new_recipe.slug, self.settings.BASE_URL
+                    ),
                 ),
             )
 

@@ -137,6 +137,8 @@ parser_ingredients = "/api/parser/ingredients"
 """`/api/parser/ingredients`"""
 recipes = "/api/recipes"
 """`/api/recipes`"""
+recipes_cooking_tools = "/api/recipes/cooking-tools"
+"""`/api/recipes/cooking-tools`"""
 recipes_bulk_actions_categorize = "/api/recipes/bulk-actions/categorize"
 """`/api/recipes/bulk-actions/categorize`"""
 recipes_bulk_actions_delete = "/api/recipes/bulk-actions/delete"
@@ -520,6 +522,11 @@ def recipes_slug_comments(slug):
 def recipes_slug_duplicate(slug):
     """`/api/recipes/{slug}/duplicate`"""
     return f"{prefix}/recipes/{slug}/duplicate"
+
+
+def recipes_slug_rewrite_for_tools(slug):
+    """`/api/recipes/{slug}/rewrite-for-tools`"""
+    return f"{prefix}/recipes/{slug}/rewrite-for-tools"
 
 
 def recipes_slug_exports(slug):

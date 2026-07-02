@@ -54,17 +54,65 @@
         </p>
       </div>
     </div>
+
+    <!-- Cooking Tools Section -->
+    <BaseCardSectionTitle class="mt-5" :title="$t('household.cooking-tools')">
+      {{ $t('household.cooking-tools-description') }}
+    </BaseCardSectionTitle>
+    <div class="preference-container">
+      <div v-for="tool in availableTools" :key="tool.id">
+        <v-checkbox
+          :model-value="local.cookingTools?.includes(tool.id)"
+          hide-details
+          density="compact"
+          color="primary"
+          :label="tool.name"
+          @update:model-value="toggleTool(tool.id, $event)"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { ReadHouseholdPreferences } from "~/lib/api/types/household";
+import { useUserApi } from "~/composables/api";
 
 const preferences = defineModel<ReadHouseholdPreferences>({ required: true });
 const local = reactive({ ...preferences.value });
 watch(local, (newVal) => { preferences.value = { ...newVal }; });
 
 const i18n = useI18n();
+const api = useUserApi();
+
+// Load available cooking tools
+const availableTools = ref<Array<{ id: string; name: string }>>([]);
+
+onMounted(async () => {
+  try {
+    const { data } = await api.recipes.getCookingTools();
+    if (data) {
+      availableTools.value = data;
+    }
+  }
+  catch (err) {
+    console.error("Failed to load cooking tools:", err);
+  }
+});
+
+function toggleTool(toolId: string, enabled: boolean | null) {
+  if (!local.cookingTools) {
+    local.cookingTools = [];
+  }
+  if (enabled) {
+    if (!local.cookingTools.includes(toolId)) {
+      local.cookingTools = [...local.cookingTools, toolId];
+    }
+  }
+  else {
+    local.cookingTools = local.cookingTools.filter((t: string) => t !== toolId);
+  }
+}
 
 type Preference = {
   key: keyof ReadHouseholdPreferences;

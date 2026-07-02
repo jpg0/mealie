@@ -1,10 +1,13 @@
-from pydantic import UUID4, ConfigDict
+import json
+
+from pydantic import UUID4, ConfigDict, field_validator
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.interfaces import LoaderOption
 
 from mealie.db.models.household.household import Household
 from mealie.db.models.household.preferences import HouseholdPreferencesModel
 from mealie.schema._mealie import MealieModel
+from mealie.services.recipe.cooking_tools import COOKING_TOOLS
 
 
 class UpdateHouseholdPreferences(MealieModel):
@@ -20,6 +23,21 @@ class UpdateHouseholdPreferences(MealieModel):
     recipe_show_assets: bool = False
     recipe_landscape_view: bool = False
     recipe_disable_comments: bool = False
+
+    # Cooking Tools
+    cooking_tools: list[str] = []
+
+    @field_validator("cooking_tools", mode="before")
+    @classmethod
+    def parse_cooking_tools(cls, v):
+        if isinstance(v, str):
+            try:
+                v = json.loads(v)
+            except json.JSONDecodeError:
+                v = []
+        if not isinstance(v, list):
+            return []
+        return [t for t in v if t in COOKING_TOOLS]
 
 
 class CreateHouseholdPreferences(UpdateHouseholdPreferences): ...

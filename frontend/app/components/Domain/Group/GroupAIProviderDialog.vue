@@ -53,13 +53,12 @@
           variant="outlined"
           class="mb-4"
         />
-        <v-number-input
+        <v-text-field
           v-model.number="formData.timeout"
           :label="$t('group.ai-provider-settings.request-timeout-seconds')"
           type="number"
           :min="0"
           hide-details
-          control-variant="stacked"
           density="compact"
           variant="outlined"
           class="mb-4"

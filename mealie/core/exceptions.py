@@ -70,6 +70,14 @@ class VideoDownloadError(Exception):
     pass
 
 
+class RecipeNotImprovedError(Exception):
+    """
+    This exception is raised when the AI determines that the provided tools do not improve the recipe.
+    """
+
+    pass
+
+
 def mealie_registered_exceptions(t: Translator) -> dict:
     """
     This function returns a dictionary of all the globally registered exceptions in the Mealie application.

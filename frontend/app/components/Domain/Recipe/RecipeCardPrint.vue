@@ -49,7 +49,9 @@
     <div class="right-panel">
       <div class="recipe-header-bar">
         <div class="header-top">
-          <h1 class="recipe-title">{{ recipe.name }}</h1>
+          <h1 class="recipe-title">
+            {{ recipe.name }}
+          </h1>
           <div class="metadata-items">
             <div v-if="recipeYield" class="metadata-item" v-html="recipeYield" />
             <div v-if="recipe.prepTime" class="metadata-item">
@@ -84,7 +86,9 @@
             >
               <span class="step-number">{{ stepIndex + instructionSection.stepOffset + 1 }}</span>
               <div class="step-content">
-                <h4 v-if="step.title" class="instruction-title">{{ step.title }}</h4>
+                <h4 v-if="step.title" class="instruction-title">
+                  {{ step.title }}
+                </h4>
                 <SafeMarkdown :source="step.text" />
               </div>
             </div>
@@ -92,7 +96,9 @@
 
           <div v-if="hasNotes" class="notes-section">
             <div v-for="(note, index) in recipe.notes" :key="index">
-              <h4 class="section-title">{{ note.title }}</h4>
+              <h4 class="section-title">
+                {{ note.title }}
+              </h4>
               <SafeMarkdown :source="note.text" />
             </div>
           </div>
@@ -314,11 +320,11 @@ const recipeYield = computed(() => {
 
 <style scoped>
 .recipe-card {
-  --card-accent: #00897B;
+  --card-accent: #00897b;
   width: 297mm;
   height: 210mm;
   margin: 0 auto;
-  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: #333;
   background: white;
   display: grid;
@@ -498,7 +504,6 @@ const recipeYield = computed(() => {
   padding-top: 3px;
   margin-top: 4px;
 }
-
 </style>
 
 <style>
@@ -507,7 +512,8 @@ const recipeYield = computed(() => {
     display: none !important;
   }
 
-  body, html {
+  body,
+  html {
     margin: 0 !important;
     padding: 0 !important;
   }

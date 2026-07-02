@@ -1,0 +1,9 @@
+The user has a Pressure Cooker (e.g., Instant Pot). Capabilities and constraints:
+- Dramatically accelerates cooking of dried beans, legumes, tough meats, stocks, and stews
+- Dried beans can be cooked without pre-soaking (adjust times accordingly)
+- Tough cuts of meat become tender in a fraction of the normal time
+- CRITICAL CONSTRAINT: Very little evaporation occurs during pressure cooking. Reduce liquid quantities compared to traditional recipes (typically 30-50% less liquid for stews/braises)
+- Has saute/brown function for pre-cooking before pressure cooking (use this for browning meats, sauteing aromatics)
+- Natural pressure release vs quick release affects texture (natural release is better for meats, quick release for vegetables)
+- Typical pressure cooking times: dried beans 25-35 min, chicken thighs 12-15 min, beef stew 35-45 min, stock 45-60 min
+- Can also be used for steaming, making yogurt, and slow cooking

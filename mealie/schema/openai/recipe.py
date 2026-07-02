@@ -87,3 +87,21 @@ class OpenAIRecipe(OpenAIBase):
         default_factory=list,
         description="List of notes, tips, or variations.",
     )
+
+
+class OpenAIRecipeRewriteResponse(OpenAIBase):
+    is_improved: bool = Field(
+        ...,
+        description="True if the specified tools actually improved the recipe (duration, output, or process). False if they provided no meaningful benefit or are unsuitable."
+    )
+
+    reason: str | None = Field(
+        None,
+        description="If is_improved is false, provide a short, concise reason (max 15 words) explaining why these tools do not improve the recipe. Example: 'Thermomix does not improve grilling a steak.'"
+    )
+
+    recipe: OpenAIRecipe | None = Field(
+        None,
+        description="The rewritten recipe. Omit or leave null if is_improved is false."
+    )
+

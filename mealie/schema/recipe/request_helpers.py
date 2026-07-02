@@ -19,3 +19,8 @@ class UpdateImageResponse(BaseModel):
 
 class RecipeDuplicate(BaseModel):
     name: str | None = None
+
+
+class RecipeRewriteForTools(BaseModel):
+    name: str | None = None
+    tools: list[str]

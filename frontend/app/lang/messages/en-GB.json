@@ -749,7 +749,17 @@
     "cover-image": "Cover image",
     "include-linked-recipes": "Include Linked Recipes",
     "include-linked-recipe-ingredients": "Include Linked Recipe Ingredients",
-    "toggle-recipe": "Toggle Recipe"
+    "toggle-recipe": "Toggle Recipe",
+    "rewrite-for-tools": "Adapt for Appliances",
+    "rewrite-for-tools-submit": "Adapt",
+    "rewrite-for-tools-description": "Generate a new version of this recipe adapted for your kitchen appliances",
+    "rewrite-for-tools-select-tools": "Select Appliances",
+    "rewrite-for-tools-custom-name": "Custom Name (optional)",
+    "rewrite-for-tools-rewriting": "Adapting Recipe...",
+    "rewrite-for-tools-success": "Recipe adapted successfully",
+    "rewrite-for-tools-error": "Failed to adapt recipe",
+    "rewrite-for-tools-ai-disabled": "AI is not configured. Please set up an AI provider in your group settings.",
+    "rewrite-for-tools-no-tools": "Please select at least one appliance"
   },
   "recipe-finder": {
     "recipe-finder": "Recipe Finder",

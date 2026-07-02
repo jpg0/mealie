@@ -1,3 +1,4 @@
+import json
 from typing import TYPE_CHECKING, Optional
 
 import sqlalchemy as sa
@@ -11,6 +12,25 @@ from .._model_utils.guid import GUID
 
 if TYPE_CHECKING:
     from .household import Household
+
+
+class JsonList(sa.TypeDecorator):
+    """Stores a Python list as a JSON string in the database."""
+    impl = sa.String
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return "[]"
+        return json.dumps(value)
+
+    def process_result_value(self, value, dialect):
+        if not value:
+            return []
+        try:
+            return json.loads(value)
+        except (json.JSONDecodeError, TypeError):
+            return []
 
 
 class HouseholdPreferencesModel(SqlAlchemyBase, BaseMixins):
@@ -38,6 +58,9 @@ class HouseholdPreferencesModel(SqlAlchemyBase, BaseMixins):
 
     # Deprecated
     recipe_disable_amount: FilterableColumn[bool | None] = mapped_column(sa.Boolean, default=True)
+
+    # Cooking Tools
+    cooking_tools: Mapped[list | None] = mapped_column(JsonList, default="[]")
 
     @auto_init()
     def __init__(self, **_) -> None:

@@ -350,6 +350,14 @@ export interface RecipeCommentUpdate {
 export interface RecipeDuplicate {
   name?: string | null;
 }
+export interface RecipeRewriteForTools {
+  name?: string | null;
+  tools: string[];
+}
+export interface CookingToolDefinition {
+  id: string;
+  name: string;
+}
 export interface RecipeIngredientBase {
   quantity?: number | null;
   unit?: IngredientUnit | CreateIngredientUnit | null;

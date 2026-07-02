@@ -75,6 +75,7 @@
           share: loggedIn,
           recipeActions: true,
           delete: loggedIn,
+          rewriteForTools: showRewriteForTools,
         }"
         class="ml-1"
         @print="$emit('print')"
@@ -104,6 +105,8 @@
 import RecipeContextMenu from "./RecipeContextMenu/RecipeContextMenu.vue";
 import RecipeFavoriteBadge from "./RecipeFavoriteBadge.vue";
 import RecipeTimelineBadge from "./RecipeTimelineBadge.vue";
+import { useGroupSelf } from "~/composables/use-groups";
+import { useHouseholdSelf } from "~/composables/use-households";
 import type { Recipe } from "~/lib/api/types/recipe";
 
 const SAVE_EVENT = "save";
@@ -121,13 +124,23 @@ interface Props {
   recipeId: string;
   canEdit?: boolean;
 }
-withDefaults(defineProps<Props>(), {
+
+const props = withDefaults(defineProps<Props>(), {
   recipeScale: 1,
   loggedIn: false,
   canEdit: false,
 });
 
 const emit = defineEmits(["print", "input", "save", "delete", "close", "json", "edit"]);
+
+const { group } = useGroupSelf();
+const { household: householdRef } = useHouseholdSelf();
+
+const showRewriteForTools = computed(() => {
+  return props.loggedIn
+    && group.value?.aiProviderSettings?.aiEnabled
+    && (householdRef.value?.preferences?.cookingTools?.length ?? 0) > 0;
+});
 
 const deleteDialog = ref(false);
 

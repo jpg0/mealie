@@ -58,6 +58,7 @@ interface ContextMenuIncludes {
   printPreferences?: boolean;
   share?: boolean;
   recipeActions?: boolean;
+  rewriteForTools?: boolean;
 }
 
 interface ContextMenuItem {
@@ -96,6 +97,7 @@ const props = withDefaults(defineProps<Props>(), {
     printPreferences: true,
     share: true,
     recipeActions: true,
+    rewriteForTools: false,
   }),
   appendItems: () => [],
   leadingItems: () => [],

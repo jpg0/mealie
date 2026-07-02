@@ -32,6 +32,8 @@ from mealie.schema.user.user import PrivateUser, UserRatingCreate
 from mealie.services._base_service import BaseService
 from mealie.services.household_services.household_service import HouseholdService
 from mealie.services.openai import OpenAILocalImage, OpenAIService
+from mealie.services.openai.openai import OpenAIDataInjection
+from mealie.services.recipe.cooking_tools import validate_tool_ids
 from mealie.services.recipe.recipe_data_service import RecipeDataService
 from mealie.services.scraper import cleaner
 
@@ -620,6 +622,105 @@ class OpenAIRecipeService(RecipeServiceBase):
             ],
             notes=[RecipeNote(title=note.title or "", text=note.text) for note in openai_recipe.notes if note.text],
         )
+
+    @staticmethod
+    def _serialize_recipe_for_prompt(recipe: Recipe) -> str:
+        """Convert a Recipe to a human-readable text representation for the AI prompt."""
+        parts = []
+        parts.append(f"Recipe: {recipe.name}")
+
+        if recipe.description:
+            parts.append(f"Description: {recipe.description}")
+        if recipe.recipe_yield:
+            parts.append(f"Yield: {recipe.recipe_yield}")
+        if recipe.total_time:
+            parts.append(f"Total Time: {recipe.total_time}")
+        if recipe.prep_time:
+            parts.append(f"Prep Time: {recipe.prep_time}")
+        if recipe.perform_time:
+            parts.append(f"Cook Time: {recipe.perform_time}")
+
+        if recipe.recipe_ingredient:
+            parts.append("\nIngredients:")
+            current_section = None
+            for ing in recipe.recipe_ingredient:
+                if ing.title and ing.title != current_section:
+                    current_section = ing.title
+                    parts.append(f"  [{ing.title}]")
+                parts.append(f"  - {ing.display or ing.note or ''}")
+
+        if recipe.recipe_instructions:
+            parts.append("\nInstructions:")
+            current_section = None
+            step_num = 1
+            for step in recipe.recipe_instructions:
+                if step.title and step.title != current_section:
+                    current_section = step.title
+                    parts.append(f"  [{step.title}]")
+                parts.append(f"  {step_num}. {step.text}")
+                step_num += 1
+
+        if recipe.notes:
+            parts.append("\nNotes:")
+            for note in recipe.notes:
+                prefix = f"{note.title}: " if note.title else ""
+                parts.append(f"  - {prefix}{note.text}")
+
+        return "\n".join(parts)
+
+    async def rewrite_recipe_for_tools(
+        self,
+        original: Recipe,
+        new_name: str,
+        tool_ids: list[str],
+    ) -> Recipe:
+        """Rewrite a recipe using AI, optimized for the specified cooking tools."""
+
+        tools = validate_tool_ids(tool_ids)
+        if not tools:
+            raise ValueError("At least one cooking tool must be specified")
+
+        openai_service = OpenAIService(self.repos)
+        if not openai_service.default_provider:
+            raise ValueError("AI services are not available")
+
+        recipe_text = self._serialize_recipe_for_prompt(original)
+
+        data_injections = [
+            OpenAIDataInjection(description="Original Recipe", value=recipe_text),
+        ]
+        for tool in tools:
+            tool_prompt_text = openai_service._load_prompt_from_file(tool.prompt_name)
+            data_injections.append(
+                OpenAIDataInjection(description=f"{tool.name} Tool Instructions", value=tool_prompt_text)
+            )
+
+        prompt = openai_service.get_prompt(
+            "recipes.rewrite-for-tools",
+            data_injections=data_injections,
+        )
+
+        from mealie.schema.openai.recipe import OpenAIRecipeRewriteResponse
+        response = await openai_service.get_response(
+            prompt,
+            f"Please rewrite the provided recipe to use the following tools: {', '.join(t.name for t in tools)}.",
+            response_schema=OpenAIRecipeRewriteResponse,
+        )
+
+        if not response:
+            raise ValueError("Received empty response from AI")
+            
+        if not response.is_improved:
+            from mealie.core.exceptions import RecipeNotImprovedError
+            raise RecipeNotImprovedError(response.reason or "The tools provided no meaningful benefit to the recipe.")
+            
+        if not response.recipe:
+            raise ValueError("AI indicated improvement but provided no recipe data.")
+
+        recipe = self._convert_recipe(response.recipe)
+        recipe.name = new_name
+        recipe.slug = create_recipe_slug(new_name)
+        return recipe
 
     async def build_recipe_from_images(self, images: list[Path], translate_language: str | None) -> Recipe:
         openai_service = OpenAIService(self.repos)

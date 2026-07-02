@@ -72,6 +72,10 @@ def test_update_provider(api_client: TestClient, unique_user: TestUser):
         updated = response.json()
         assert updated["model"] == new_model
         assert updated["id"] == str(provider.id)
+
+        # Verify database update
+        db_provider = unique_user.repos.group_ai_providers.get_one(provider.id)
+        assert db_provider.api_key == "updated-key"
     finally:
         api_client.delete(api_routes.groups_ai_providers_providers_provider_id(provider.id), headers=unique_user.token)
 

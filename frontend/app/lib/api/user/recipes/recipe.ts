@@ -9,7 +9,9 @@ import type {
   CreateRecipe,
   RecipeAsset,
   CreateRecipeByUrlBulk,
+  CookingToolDefinition,
   ParsedIngredient,
+  RecipeRewriteForTools,
   UpdateImageResponse,
   RecipeLastMade,
   RecipeSuggestionQuery,
@@ -58,6 +60,8 @@ const routes = {
   recipesSlugLastMade: (slug: string) => `${prefix}/recipes/${slug}/last-made`,
   recipesTimelineEventId: (id: string) => `${prefix}/recipes/timeline/events/${id}`,
   recipesTimelineEventIdImage: (id: string) => `${prefix}/recipes/timeline/events/${id}/image`,
+  recipesCookingTools: `${prefix}/recipes/cooking-tools`,
+  recipesRecipeSlugRewriteForTools: (slug: string) => `${prefix}/recipes/${slug}/rewrite-for-tools`,
 };
 
 export type RecipeSearchQuery = {
@@ -279,5 +283,13 @@ export class RecipeAPI extends BaseCRUDAPI<CreateRecipe, Recipe, Recipe> {
     formData.append("extension", fileName.split(".").pop() ?? "");
 
     return await this.requests.put<UpdateImageResponse, FormData>(routes.recipesTimelineEventIdImage(eventId), formData);
+  }
+
+  async rewriteForTools(slug: string, payload: RecipeRewriteForTools) {
+    return await this.requests.post<Recipe>(routes.recipesRecipeSlugRewriteForTools(slug), payload);
+  }
+
+  async getCookingTools() {
+    return await this.requests.get<CookingToolDefinition[]>(routes.recipesCookingTools);
   }
 }

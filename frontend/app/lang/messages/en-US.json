@@ -340,7 +340,11 @@
     "default-recipe-preferences-description": "These are the default settings when a new recipe is created in your household. These can be changed for individual recipes in the recipe settings menu.",
     "allow-users-outside-of-your-household-to-see-your-recipes": "Allow users outside of your household to see your recipes",
     "allow-users-outside-of-your-household-to-see-your-recipes-description": "When enabled you can use a public share link to share specific recipes without authorizing the user. When disabled, you can only share recipes with users who are in your household or with a pre-generated private link",
-    "household-preferences": "Household Preferences"
+    "household-preferences": "Household Preferences",
+    "cooking-tools": "Cooking Tools",
+    "cooking-tools-description": "Select the kitchen tools you have available for recipe optimization",
+    "cooking-tools-thermomix": "Thermomix",
+    "cooking-tools-pressure-cooker": "Pressure Cooker"
   },
   "meal-plan": {
     "create-a-new-meal-plan": "Create a New Meal Plan",
@@ -750,7 +754,17 @@
     "cover-image": "Cover image",
     "include-linked-recipes": "Include Linked Recipes",
     "include-linked-recipe-ingredients": "Include Linked Recipe Ingredients",
-    "toggle-recipe": "Toggle Recipe"
+    "toggle-recipe": "Toggle Recipe",
+    "rewrite-for-tools": "Adapt for Appliances",
+    "rewrite-for-tools-submit": "Adapt",
+    "rewrite-for-tools-description": "Generate a new version of this recipe adapted for your kitchen appliances",
+    "rewrite-for-tools-select-tools": "Select Appliances",
+    "rewrite-for-tools-custom-name": "Custom Name (optional)",
+    "rewrite-for-tools-rewriting": "Adapting Recipe...",
+    "rewrite-for-tools-success": "Recipe adapted successfully",
+    "rewrite-for-tools-error": "Failed to adapt recipe",
+    "rewrite-for-tools-ai-disabled": "AI is not configured. Please set up an AI provider in your group settings.",
+    "rewrite-for-tools-no-tools": "Please select at least one appliance"
   },
   "recipe-finder": {
     "recipe-finder": "Recipe Finder",
@@ -1400,7 +1414,6 @@
       "already-set-up-bring-to-homepage": "I'm already set up, just bring me to the homepage",
       "common-settings-for-new-sites": "Here are some common settings for new sites",
       "setup-complete": "Setup Complete!",
-
       "ai-providers-description": "Optionally configure AI providers for your group. AI providers enable features like creating recipes from images, importing recipes from videos, and enhanced ingredient parsing. You can always configure this later from your group settings.",
       "here-are-a-few-things-to-help-you-get-started": "Here are a few things to help you get started with Mealie",
       "restore-from-v1-backup": "Have a backup from a previous instance of Mealie v1? You can restore it here.",
@@ -1414,7 +1427,7 @@
     "household-delete-note": "Households with users cannot be deleted"
   },
   "profile": {
-    "welcome-user": "👋 Welcome, {0}!",
+    "welcome-user": "\ud83d\udc4b Welcome, {0}!",
     "description": "Manage your profile, recipes, and group settings.",
     "invite-link": "Invite Link",
     "get-invite-link": "Get Invite Link",

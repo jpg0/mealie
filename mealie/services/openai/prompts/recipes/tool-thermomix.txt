@@ -1,0 +1,10 @@
+The user has a Thermomix (TM5/TM6). Capabilities and constraints:
+- Excellent at chopping, blending, mixing, kneading, and keeping things moving while cooking
+- Can heat and cook while stirring simultaneously (sauteing, sauces, risotto, custards)
+- Has a built-in scale for precise quantities
+- CRITICAL CONSTRAINT: Requires a strict linear workflow — it has ONE vessel (the mixing bowl). You cannot have two things cooking in the Thermomix at once. Plan steps sequentially.
+- The Varoma (steamer attachment) allows steaming above the bowl while cooking something else below
+- Common speeds: speed 1-4 for mixing/stirring, speed 5-10 for chopping/blending
+- Temperature range: 37-120 degrees Celsius (Varoma setting for steaming is higher)
+- Reverse blade function for gentle stirring without cutting
+- Think about what can be done in the Thermomix vs what should be done in a regular pan/oven alongside it
