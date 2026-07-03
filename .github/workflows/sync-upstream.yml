@@ -1,0 +1,36 @@
+name: Auto-merge Upstream Changes
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Runs weekly on Sundays at midnight
+  workflow_dispatch: # Allows manual trigger from the GitHub UI
+
+permissions:
+  contents: write
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git Identity
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "actions@github.com"
+
+      - name: Fetch and Merge Upstream
+        run: |
+          # Add upstream remote
+          git remote add upstream https://github.com/mealie-recipes/mealie.git
+          git fetch upstream main
+          
+          # Merge upstream/main into the current branch
+          git checkout ${{ github.ref_name }}
+          git merge upstream/main -m "chore: auto-merge upstream changes"
+          
+          # Push changes back to origin
+          git push origin ${{ github.ref_name }}
