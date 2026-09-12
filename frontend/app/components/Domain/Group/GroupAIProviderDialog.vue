@@ -59,7 +59,6 @@
           type="number"
           :min="0"
           hide-details
-          control-variant="stacked"
           density="compact"
           variant="outlined"
           class="mb-4"
@@ -89,7 +88,7 @@
         </v-expansion-panels>
       </v-form>
     </v-card-text>
-    <AppLoader v-else waiting-text="" />
+    <AppLoader v-else />
   </BaseDialog>
 </template>
 
